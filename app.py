@@ -1,7 +1,6 @@
 import glob
 import os
 from io import BytesIO
-from urllib2 import Request, urlopen
 
 import boto3
 import requests
