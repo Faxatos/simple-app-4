@@ -8,6 +8,9 @@ import requests
 from PIL import Image
 from flask import Flask, render_template, request, flash
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 app = Flask(__name__)
 
@@ -20,7 +23,7 @@ if not os.path.exists(UPLOAD_DIR):
     os.mkdir(UPLOAD_DIR)
 
 # configure boto3 client
-s3_client = boto3.client('s3', aws_access_key_id = os.environ['AWS_ACCESS_KEY_ID'], aws_secret_access_key = os.environ['AWS_SECRET_ACCESS_KEY'])
+s3_client = boto3.client('s3')
 
 
 # utility functions
@@ -32,7 +35,7 @@ def request_and_save(url, filename):
 
     req = requests.get(url)
     #logging.debug(req)
-    #logging.debug(req.content)
+    print(req.content)
     im = Image.open(BytesIO(req.content))
     path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     im.save(path, "PNG")
@@ -63,9 +66,10 @@ def apply_watermark():
 
     # GENERATE REQUEST FOR QRACKAJACK
     qr_image = get_s3_url(bucket_name, filename)
-    print(qr_image)
+    #print(qr_image)
     qrack_api = os.environ['QRACKAJACK_API_KEY']
-    qr_req_url = "https://qrackajack.expeditedaddons.com/?api_key={qrack_api}&content={qr_image}"
+    qr_req_url = f"https://qrackajack.expeditedaddons.com/?api_key={qrack_api}&content={qr_image}"
+    print(qr_req_url)
 
     qr_name = f"qr_{filename}"
     qr_path = request_and_save(qr_req_url, qr_name)
@@ -76,7 +80,7 @@ def apply_watermark():
     # GENERATE REQUEST FOR WATERMARKER
     qr_watermark = get_s3_url(bucket_name, qr_name)
     water_api = os.environ['WATERMARKER_API_KEY']
-    watermark_req_url = "https://watermarker.expeditedaddons.com/?api_key={water_api}&image_url={qr_image}&watermark_url={qr_watermark}&opacity=50&position=center&width=100&height=100"
+    watermark_req_url = f"https://watermarker.expeditedaddons.com/?api_key={water_api}&image_url={qr_image}&watermark_url={qr_watermark}&opacity=80&position=center&width=800&height=800"
 
     watermark_name = f"watermark_{filename}"
     request_and_save(watermark_req_url, watermark_name)
