@@ -8,9 +8,6 @@ import requests
 from PIL import Image
 from flask import Flask, render_template, request, flash
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
-
-load_dotenv(".env")
 
 app = Flask(__name__)
 
