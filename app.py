@@ -1,10 +1,12 @@
 import glob
 import os
 from io import BytesIO
+from urllib2 import Request, urlopen
 
 import boto3
 import requests
 from PIL import Image
+from PIL import io
 from flask import Flask, render_template, request, flash
 from werkzeug.utils import secure_filename
 
@@ -30,9 +32,22 @@ def get_s3_url(bucket_name, filename):
 def request_and_save(url, filename):
     req = requests.get(url)
 
-    im = Image.open(BytesIO(req.content))
+    '''byteImgIO = io.BytesIO()
+    byteImg = Image.open(req.content)
+    byteImg.save(byteImgIO, "PNG")
+    byteImgIO.seek(0)
+    byteImg = byteImgIO.read()
+
+    dataBytesIO = io.BytesIO(byteImg)
+    Image.open(dataBytesIO)'''
+
+    byteImgIO = io.BytesIO()
+    im = Image.open(req.content)
     path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    im.save(path, "PNG")
+    #im.save(path, "PNG")
+    im.save(byteImgIO, "PNG")
+    byteImgIO.seek(0)
+    byteImg = byteImgIO.read()
 
     return path
 
