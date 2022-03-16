@@ -31,8 +31,8 @@ def get_s3_url(bucket_name, filename):
 def request_and_save(url, filename):
 
     req = requests.get(url)
-    logging.debug(req)
-    logging.debug(req.content)
+    #logging.debug(req)
+    #logging.debug(req.content)
     im = Image.open(BytesIO(req.content))
     path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     im.save(path, "PNG")
@@ -63,6 +63,7 @@ def apply_watermark():
 
     # GENERATE REQUEST FOR QRACKAJACK
     qr_image = get_s3_url(bucket_name, filename)
+    print(qr_image)
     qrack_api = os.environ['QRACKAJACK_API_KEY']
     qr_req_url = "https://qrackajack.expeditedaddons.com/?api_key={qrack_api}&content={qr_image}"
 
